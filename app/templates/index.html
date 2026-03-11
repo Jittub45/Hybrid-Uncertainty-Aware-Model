@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hybrid Uncertainty-Aware Precision Crop Recommendation System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green-dark:   #1b5e20;
+      --green-mid:    #2e7d32;
+      --green-light:  #43a047;
+      --green-pale:   #e8f5e9;
+      --green-accent: #00c853;
+      --brown:        #5d4037;
+      --amber:        #ff8f00;
+      --text:         #1a1a2e;
+      --text-muted:   #546e7a;
+      --bg:           #f0f4ef;
+      --card:         #ffffff;
+      --shadow:       0 8px 32px rgba(27,94,32,.12);
+      --radius:       18px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: "Inter", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ─── Hero Header ───────────────────────────────────────────── */
+    .hero {
+      background: linear-gradient(135deg, var(--green-dark) 0%, #33691e 40%, #558b2f 100%);
+      color: #fff;
+      padding: 56px 24px 80px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: "";
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='1.5' fill='rgba(255,255,255,.08)'/%3E%3C/svg%3E") repeat;
+    }
+    .hero-emoji { font-size: 64px; line-height:1; margin-bottom: 16px; }
+    .hero h1 {
+      font-family: "Poppins", sans-serif;
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      position: relative;
+    }
+    .hero h1 span { color: #a5d6a7; }
+    .hero p {
+      margin-top: 12px;
+      font-size: clamp(14px, 2vw, 18px);
+      opacity: .85;
+      max-width: 600px;
+      margin-inline: auto;
+      position: relative;
+    }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 20px;
+      background: rgba(255,255,255,.15);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 50px;
+      padding: 6px 18px;
+      font-size: 13px; font-weight: 500;
+      position: relative;
+    }
+    .badge::before { content: "✦"; color: #a5d6a7; }
+
+    /* ─── Main Layout ───────────────────────────────────────────── */
+    .container {
+      max-width: 960px;
+      margin: -40px auto 60px;
+      padding: 0 20px;
+    }
+
+    /* ─── Cards ─────────────────────────────────────────────────── */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 36px 40px;
+      margin-bottom: 28px;
+    }
+
+    .card-title {
+      font-family: "Poppins", sans-serif;
+      font-size: 19px; font-weight: 700;
+      color: var(--green-dark);
+      margin-bottom: 24px;
+      display: flex; align-items: center; gap: 10px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid var(--green-pale);
+    }
+    .card-title .icon {
+      width: 36px; height: 36px;
+      background: var(--green-pale);
+      border-radius: 10px;
+      display: grid; place-items: center;
+      font-size: 18px;
+    }
+
+    /* ─── Form Grid ─────────────────────────────────────────────── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 7px; }
+    .form-group label {
+      font-size: 13px; font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: .5px;
+    }
+    .form-group .hint { font-size: 11px; color: #90a4ae; margin-top: -4px; }
+    .form-group input {
+      border: 2px solid #e0e7df;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 15px;
+      color: var(--text);
+      transition: border .25s, box-shadow .25s;
+      outline: none;
+      background: #fafffe;
+    }
+    .form-group input:focus {
+      border-color: var(--green-light);
+      box-shadow: 0 0 0 4px rgba(67,160,71,.12);
+    }
+    .form-group input::-webkit-inner-spin-button { opacity: .5; }
+
+    /* ─── Nutrient Section divider ───────────────────────────────── */
+    .section-label {
+      grid-column: 1 / -1;
+      font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px;
+      color: #a5b8a3;
+      padding-top: 4px;
+    }
+
+    /* ─── Submit Button ─────────────────────────────────────────── */
+    .btn-submit {
+      margin-top: 28px;
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--green-mid), var(--green-light));
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-family: "Poppins", sans-serif;
+      font-size: 16px; font-weight: 700;
+      cursor: pointer;
+      letter-spacing: .3px;
+      transition: transform .15s, box-shadow .2s, opacity .2s;
+      box-shadow: 0 4px 18px rgba(46,125,50,.35);
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(46,125,50,.45);
+    }
+    .btn-submit:active { transform: translateY(0); }
+    .btn-submit:disabled { opacity: .65; cursor: not-allowed; transform: none; }
+
+    /* Spinner inside button */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 3px solid rgba(255,255,255,.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── Result Card ───────────────────────────────────────────── */
+    #result-section { display: none; }
+
+    .result-header {
+      display: flex; align-items: center; gap: 20px;
+      padding: 28px;
+      border-radius: 14px;
+      margin-bottom: 24px;
+      color: #fff;
+      position: relative; overflow: hidden;
+    }
+    .result-header::before {
+      content: "";
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,.12);
+    }
+    .result-emoji-wrap {
+      font-size: 64px; line-height:1;
+      background: rgba(255,255,255,.18);
+      border-radius: 16px;
+      padding: 12px 16px;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .result-text { position: relative; }
+    .result-text .label {
+      font-size: 12px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 1.5px;
+      opacity: .8; margin-bottom: 4px;
+    }
+    .result-text .crop-name {
+      font-family: "Poppins", sans-serif;
+      font-size: clamp(26px, 4vw, 38px);
+      font-weight: 800;
+      text-transform: capitalize;
+      line-height: 1.1;
+    }
+    .result-desc {
+      margin-top: 8px;
+      font-size: 14px; opacity: .9;
+      max-width: 480px; line-height: 1.6;
+    }
+
+    /* ─── Probability Bars ──────────────────────────────────────── */
+    .prob-section h3 {
+      font-size: 14px; font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: .8px;
+      margin-bottom: 18px;
+    }
+
+    .prob-item { margin-bottom: 14px; }
+    .prob-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 5px;
+    }
+    .prob-crop {
+      font-size: 14px; font-weight: 600;
+      text-transform: capitalize;
+      color: var(--text);
+    }
+    .prob-val {
+      font-size: 13px; font-weight: 700;
+      color: var(--green-mid);
+    }
+    .prob-bar-bg {
+      width: 100%; height: 10px;
+      background: #e8f5e9;
+      border-radius: 99px; overflow: hidden;
+    }
+    .prob-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--green-mid), var(--green-accent));
+      width: 0%;
+      transition: width .9s cubic-bezier(.25,.46,.45,.94);
+    }
+    .prob-item.first .prob-bar-fill {
+      background: linear-gradient(90deg, #1b5e20, #00c853);
+    }
+
+    /* ─── Error toast ───────────────────────────────────────────── */
+    .error-msg {
+      background: #ffebee; border: 1.5px solid #ef9a9a;
+      border-radius: 12px; padding: 14px 18px;
+      color: #c62828; font-size: 14px; font-weight: 500;
+      display: none; margin-top: 16px;
+    }
+
+    /* ─── Info Cards Strip ──────────────────────────────────────── */
+    .info-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .info-box {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 12px rgba(27,94,32,.07);
+      border-top: 3px solid var(--green-light);
+    }
+    .info-box .num {
+      font-family: "Poppins", sans-serif;
+      font-size: 28px; font-weight: 800;
+      color: var(--green-mid);
+    }
+    .info-box .lbl { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    /* ─── Footer ────────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 32px 20px;
+      font-size: 13px;
+      color: #90a4ae;
+      border-top: 1px solid #e0e7df;
+    }
+    footer span { color: var(--green-mid); font-weight: 600; }
+
+    /* ─── Sample Cards ──────────────────────────────────────────── */
+    .samples-section { margin-bottom: 28px; }
+    .samples-title {
+      font-size: 13px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .8px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .samples-title::after {
+      content: ""; flex: 1; height: 1px; background: #e0e7df;
+    }
+    .samples-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .sample-card {
+      background: var(--card);
+      border: 2px solid #e0e7df;
+      border-radius: 14px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: border-color .2s, transform .15s, box-shadow .2s;
+      text-align: center;
+      user-select: none;
+    }
+    .sample-card:hover {
+      border-color: var(--green-light);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(46,125,50,.15);
+    }
+    .sample-card:active { transform: translateY(-1px); }
+    .sample-card.active {
+      border-color: var(--green-mid);
+      background: var(--green-pale);
+    }
+    .sample-card .s-emoji { font-size: 28px; line-height: 1; margin-bottom: 6px; }
+    .sample-card .s-name {
+      font-family: "Poppins", sans-serif;
+      font-size: 14px; font-weight: 700;
+      color: var(--green-dark);
+      text-transform: capitalize;
+      margin-bottom: 4px;
+    }
+    .sample-card .s-hint {
+      font-size: 10px; color: #90a4ae;
+      line-height: 1.5;
+    }
+    .sample-card .s-tap {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 10px; font-weight: 700;
+      color: var(--green-mid);
+      background: rgba(46,125,50,.1);
+      border-radius: 50px;
+      padding: 2px 10px;
+      letter-spacing: .3px;
+    }
+
+    /* ─── Animate in ────────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp .5s ease both; }
+
+    /* ─── Responsive ────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .card { padding: 24px 20px; }
+      .result-header { flex-direction: column; text-align: center; }
+      .result-desc { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── Hero ──────────────────────────────────────────────────────────────── -->
+<div class="hero">
+  <div class="hero-emoji">🌾</div>
+  <h1>Hybrid Uncertainty-Aware Model for <span>Precision Crop</span> Recommendation</h1>
+  <p>A stacked ensemble ML system combining LightGBM, XGBoost &amp; CatBoost with SHAP explainability — delivering agronomic intelligence from soil &amp; climate inputs.</p>
+  <div class="badge">Stacked Ensemble · 99.55% Accuracy · 22 Crop Classes</div>
+</div>
+
+<!-- ─── Main Content ──────────────────────────────────────────────────────── -->
+<div class="container">
+
+  <!-- Stats strip -->
+  <div class="info-strip fade-up">
+    <div class="info-box">
+      <div class="num">22</div>
+      <div class="lbl">Crop Varieties</div>
+    </div>
+    <div class="info-box">
+      <div class="num">99.55%</div>
+      <div class="lbl">Model Accuracy</div>
+    </div>
+    <div class="info-box">
+      <div class="num">7</div>
+      <div class="lbl">Input Parameters</div>
+    </div>
+    <div class="info-box">
+      <div class="num">2200</div>
+      <div class="lbl">Training Samples</div>
+    </div>
+    <div class="info-box">
+      <div class="num">RF</div>
+      <div class="lbl">Algorithm Used</div>
+    </div>
+  </div>
+
+  <!-- Sample Cards -->
+  <div class="samples-section fade-up" style="animation-delay:.08s">
+    <div class="samples-title">🧬 Quick Test — Click a sample to auto-fill</div>
+    <div class="samples-grid">
+
+      <div class="sample-card" onclick="fillSample('rice')" id="scard-rice">
+        <div class="s-emoji">🍚</div>
+        <div class="s-name">Rice</div>
+        <div class="s-hint">N=60 · P=49 · K=44<br/>Temp=20.78°C · pH=6.24</div>
+        <span class="s-tap">Tap to fill</span>
+      </div>
+
+      <div class="sample-card" onclick="fillSample('mango')" id="scard-mango">
+        <div class="s-emoji">🥭</div>
+        <div class="s-name">Mango</div>
+        <div class="s-hint">N=36 · P=26 · K=26<br/>Temp=30.17°C · pH=6.81</div>
+        <span class="s-tap">Tap to fill</span>
+      </div>
+
+      <div class="sample-card" onclick="fillSample('cotton')" id="scard-cotton">
+        <div class="s-emoji">🌿</div>
+        <div class="s-name">Cotton</div>
+        <div class="s-hint">N=140 · P=38 · K=15<br/>Temp=24.15°C · pH=6.02</div>
+        <span class="s-tap">Tap to fill</span>
+      </div>
+
+      <div class="sample-card" onclick="fillSample('coffee')" id="scard-coffee">
+        <div class="s-emoji">☕</div>
+        <div class="s-name">Coffee</div>
+        <div class="s-hint">N=109 · P=31 · K=27<br/>Temp=23.06°C · pH=6.97</div>
+        <span class="s-tap">Tap to fill</span>
+      </div>
+
+      <div class="sample-card" onclick="fillSample('apple')" id="scard-apple">
+        <div class="s-emoji">🍎</div>
+        <div class="s-name">Apple</div>
+        <div class="s-hint">N=0 · P=133 · K=200<br/>Temp=23.67°C · pH=5.71</div>
+        <span class="s-tap">Tap to fill</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Input form -->
+  <div class="card fade-up" style="animation-delay:.1s">
+    <div class="card-title">
+      <div class="icon">🧪</div>
+      Soil &amp; Climate Parameters
+    </div>
+
+    <form id="cropForm" onsubmit="return false;">
+      <div class="form-grid">
+
+        <div class="section-label">🌱 Soil Nutrients (mg/kg)</div>
+
+        <div class="form-group">
+          <label>Nitrogen (N)</label>
+          <span class="hint">Range: 0 – 140</span>
+          <input type="number" id="N" placeholder="e.g. 90" min="0" max="140" step="0.1" required />
+        </div>
+        <div class="form-group">
+          <label>Phosphorous (P)</label>
+          <span class="hint">Range: 5 – 145</span>
+          <input type="number" id="P" placeholder="e.g. 42" min="5" max="145" step="0.1" required />
+        </div>
+        <div class="form-group">
+          <label>Potassium (K)</label>
+          <span class="hint">Range: 5 – 205</span>
+          <input type="number" id="K" placeholder="e.g. 43" min="5" max="205" step="0.1" required />
+        </div>
+
+        <div class="section-label">🌡️ Climate Conditions</div>
+
+        <div class="form-group">
+          <label>Temperature (°C)</label>
+          <span class="hint">Range: 8.8 – 43.7</span>
+          <input type="number" id="temperature" placeholder="e.g. 25.0" min="8.8" max="43.7" step="0.01" required />
+        </div>
+        <div class="form-group">
+          <label>Humidity (%)</label>
+          <span class="hint">Range: 14.3 – 100</span>
+          <input type="number" id="humidity" placeholder="e.g. 82.0" min="14.3" max="100" step="0.01" required />
+        </div>
+        <div class="form-group">
+          <label>Soil pH</label>
+          <span class="hint">Range: 3.5 – 9.9</span>
+          <input type="number" id="ph" placeholder="e.g. 6.5" min="3.5" max="9.9" step="0.01" required />
+        </div>
+        <div class="form-group">
+          <label>Rainfall (mm)</label>
+          <span class="hint">Range: 20.2 – 298.6</span>
+          <input type="number" id="rainfall" placeholder="e.g. 202.0" min="20.2" max="298.6" step="0.1" required />
+        </div>
+      </div>
+
+      <button class="btn-submit" type="button" id="submitBtn" onclick="predictCrop()">
+        <span id="btnIcon">🌱</span>
+        <span id="btnText">Get Crop Recommendation</span>
+        <div class="spinner" id="spinner"></div>
+      </button>
+
+      <div class="error-msg" id="errorMsg"></div>
+    </form>
+  </div>
+
+  <!-- Result card -->
+  <div class="card fade-up" id="result-section" style="animation-delay:.2s">
+    <div class="card-title">
+      <div class="icon">✅</div>
+      Recommendation Result
+    </div>
+
+    <!-- Crop header banner -->
+    <div class="result-header" id="resultHeader">
+      <div class="result-emoji-wrap" id="resultEmoji"></div>
+      <div class="result-text">
+        <div class="label">Recommended Crop</div>
+        <div class="crop-name" id="resultCrop"></div>
+        <div class="result-desc" id="resultDesc"></div>
+      </div>
+    </div>
+
+    <!-- Top-5 probability bars -->
+    <div class="prob-section">
+      <h3>Top 5 Predicted Crops</h3>
+      <div id="probBars"></div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- ─── Footer ──────────────────────────────────────────────────────────────── -->
+<footer>
+  Built with <span>Machine Learning</span> · Random Forest Classifier ·
+  Dataset: 2200 samples · 22 crop classes ·
+  <span>Crop Recommendation System © 2026</span>
+</footer>
+
+<!-- ─── JavaScript ───────────────────────────────────────────────────────────── -->
+<script>
+  // ─── Sample data (real test-set rows) ────────────────────────────────────
+  const SAMPLES = {
+    rice:   { N: 60,   P: 49,  K: 44,  temperature: 20.78, humidity: 84.50, ph: 6.24, rainfall: 240.08 },
+    mango:  { N: 36,   P: 26,  K: 26,  temperature: 30.17, humidity: 51.08, ph: 6.81, rainfall: 95.23  },
+    cotton: { N: 140,  P: 38,  K: 15,  temperature: 24.15, humidity: 75.88, ph: 6.02, rainfall: 69.92  },
+    coffee: { N: 109,  P: 31,  K: 27,  temperature: 23.06, humidity: 50.41, ph: 6.97, rainfall: 164.50 },
+    apple:  { N: 0,    P: 133, K: 200, temperature: 23.67, humidity: 90.49, ph: 5.71, rainfall: 104.23 },
+  };
+
+  function fillSample(crop) {
+    const s = SAMPLES[crop];
+    if (!s) return;
+
+    // Fill all inputs
+    document.getElementById("N").value           = s.N;
+    document.getElementById("P").value           = s.P;
+    document.getElementById("K").value           = s.K;
+    document.getElementById("temperature").value = s.temperature;
+    document.getElementById("humidity").value    = s.humidity;
+    document.getElementById("ph").value          = s.ph;
+    document.getElementById("rainfall").value    = s.rainfall;
+
+    // Highlight active card
+    document.querySelectorAll(".sample-card").forEach(c => c.classList.remove("active"));
+    document.getElementById("scard-" + crop).classList.add("active");
+
+    // Clear previous result & error
+    document.getElementById("errorMsg").style.display = "none";
+    document.getElementById("result-section").style.display = "none";
+
+    // Scroll to form smoothly
+    document.getElementById("cropForm").scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  async function predictCrop() {
+    const btn     = document.getElementById("submitBtn");
+    const spinner = document.getElementById("spinner");
+    const btnIcon = document.getElementById("btnIcon");
+    const btnText = document.getElementById("btnText");
+    const errMsg  = document.getElementById("errorMsg");
+
+    // Hide previous error/result
+    errMsg.style.display = "none";
+
+    // Collect & validate inputs
+    const fields = ["N","P","K","temperature","humidity","ph","rainfall"];
+    const data   = {};
+    for (const f of fields) {
+      const el  = document.getElementById(f);
+      const val = parseFloat(el.value);
+      if (isNaN(val)) {
+        showError(`Please enter a valid number for "${el.previousElementSibling.textContent}".`);
+        el.focus(); return;
+      }
+      data[f] = val;
+    }
+
+    // Loading state
+    btn.disabled        = true;
+    spinner.style.display = "block";
+    btnIcon.style.display = "none";
+    btnText.textContent   = "Analyzing…";
+
+    try {
+      const resp = await fetch("/predict", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify(data),
+      });
+      const result = await resp.json();
+
+      if (!result.success) {
+        showError(result.error || "Prediction failed. Please check your inputs.");
+        return;
+      }
+
+      renderResult(result);
+    } catch (err) {
+      showError("Network error: could not reach the server.");
+    } finally {
+      btn.disabled          = false;
+      spinner.style.display = "none";
+      btnIcon.style.display = "inline";
+      btnText.textContent   = "Get Crop Recommendation";
+    }
+  }
+
+  function renderResult(r) {
+    // Show section
+    const section = document.getElementById("result-section");
+    section.style.display = "block";
+
+    // Header banner
+    const header = document.getElementById("resultHeader");
+    header.style.background = `linear-gradient(135deg, ${r.color}dd, ${r.color}99)`;
+
+    document.getElementById("resultEmoji").textContent = r.emoji;
+    document.getElementById("resultCrop").textContent  = r.crop;
+    document.getElementById("resultDesc").textContent  = r.desc;
+
+    // Probability bars
+    const container = document.getElementById("probBars");
+    container.innerHTML = "";
+
+    r.top5.forEach((item, idx) => {
+      const isFirst = idx === 0;
+      const div = document.createElement("div");
+      div.className = `prob-item${isFirst ? " first" : ""}`;
+      div.innerHTML = `
+        <div class="prob-row">
+          <span class="prob-crop">${isFirst ? "★ " : ""}${item.crop}</span>
+          <span class="prob-val">${item.prob.toFixed(1)}%</span>
+        </div>
+        <div class="prob-bar-bg">
+          <div class="prob-bar-fill" data-width="${item.prob}"></div>
+        </div>`;
+      container.appendChild(div);
+    });
+
+    // Animate bars after render
+    requestAnimationFrame(() => {
+      document.querySelectorAll(".prob-bar-fill").forEach(bar => {
+        bar.style.width = bar.dataset.width + "%";
+      });
+    });
+
+    // Smooth scroll
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function showError(msg) {
+    const el = document.getElementById("errorMsg");
+    el.textContent    = "⚠ " + msg;
+    el.style.display  = "block";
+  }
+
+  // ─── Quick-fill demo values (rice conditions) ─────────────────────────────
+  document.addEventListener("DOMContentLoaded", () => {
+    // Optionally pre-fill example values
+    // document.getElementById("N").value = 90;
+  });
+</script>
+</body>
+</html>
