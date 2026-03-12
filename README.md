@@ -24,7 +24,7 @@ The model is not just accurate — it is **explainable**. SHAP values reveal *wh
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                      INPUT LAYER                            │
-│   N  |  P  |  K  |  Temp  |  Humidity  |  pH  |  Rainfall  │
+│   N  |  P  |  K  |  Temp  |  Humidity  |  pH  |  Rainfall   │
 └──────────────────────────┬──────────────────────────────────┘
                            │
                            ▼

@@ -9,3 +9,17 @@ wheels/
 # Virtual environments
 .venv/
 venv/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# NOTE: models/*.pkl are intentionally tracked — required for Render deployment
