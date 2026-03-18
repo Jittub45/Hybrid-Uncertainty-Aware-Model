@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Crop Library | {{ app_name }}{% endblock %}
+
+{% block content %}
+<section class="shell section-gap">
+  <div class="page-head">
+    <p class="kicker">Knowledge Base</p>
+    <h1>Crop Library</h1>
+    <p>Explore supported crops and their typical growing preferences.</p>
+  </div>
+
+  <div class="search-wrap">
+    <input id="cropSearch" type="search" placeholder="Search crop name..." />
+  </div>
+
+  <div class="crop-grid" id="cropGrid">
+    {% for crop in crops %}
+    <article class="crop-card" data-name="{{ crop.name }}">
+      <div class="crop-head">
+        <span class="crop-emoji">{{ crop.emoji }}</span>
+        <h3>{{ crop.name|capitalize }}</h3>
+      </div>
+      <p>{{ crop.desc }}</p>
+      <dl>
+        <dt>Soil</dt><dd>{{ crop.soil }}</dd>
+        <dt>pH</dt><dd>{{ crop.ph }}</dd>
+        <dt>Rainfall</dt><dd>{{ crop.rain }}</dd>
+        <dt>Temperature</dt><dd>{{ crop.temp }}</dd>
+      </dl>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<script>
+  const cropSearch = document.getElementById('cropSearch');
+  const cards = document.querySelectorAll('.crop-card');
+  cropSearch?.addEventListener('input', (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    cards.forEach((card) => {
+      const match = card.dataset.name.includes(q);
+      card.style.display = match ? 'block' : 'none';
+    });
+  });
+</script>
+{% endblock %}
