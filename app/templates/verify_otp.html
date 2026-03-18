@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Verify OTP | {{ app_name }}{% endblock %}
+
+{% block content %}
+<section class="shell section-gap auth-wrap">
+  <article class="panel-card auth-card reveal is-visible">
+    <p class="kicker">One Time Password</p>
+    <h1>Verify OTP</h1>
+    <p class="tiny">We sent a 6-digit OTP to <strong>{{ email }}</strong>.</p>
+
+    <form method="post" class="auth-form" autocomplete="off">
+      <label>OTP code
+        <input type="text" name="otp" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="123456" required />
+      </label>
+      <button type="submit" class="btn btn-primary">Verify & Continue</button>
+    </form>
+
+    <form method="post" action="{{ url_for('resend_otp') }}" class="resend-form">
+      <button type="submit" class="btn btn-ghost">Resend OTP</button>
+    </form>
+
+    <p class="auth-alt">Wrong email? <a href="{{ url_for('login') }}">Back to login</a></p>
+  </article>
+</section>
+{% endblock %}
