@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Predict Crop | {{ app_name }}{% endblock %}
+
+{% block content %}
+<section class="shell section-gap">
+  <div class="page-head">
+    <p class="kicker">Prediction Workspace</p>
+    <h1>Predict the most suitable crop</h1>
+    <p>Provide soil and weather conditions to get top-5 crop recommendations.</p>
+  </div>
+
+  <div class="cards-2">
+    <article class="panel-card">
+      <h3>Input Parameters</h3>
+      <form id="cropForm" class="form-grid" onsubmit="return false;">
+        <label>Nitrogen (N)
+          <input type="number" id="N" min="0" max="140" step="0.1" required />
+        </label>
+        <label>Phosphorus (P)
+          <input type="number" id="P" min="5" max="145" step="0.1" required />
+        </label>
+        <label>Potassium (K)
+          <input type="number" id="K" min="5" max="205" step="0.1" required />
+        </label>
+        <label>Temperature (C)
+          <input type="number" id="temperature" min="8.8" max="43.7" step="0.01" required />
+        </label>
+        <label>Humidity (%)
+          <input type="number" id="humidity" min="14.3" max="100" step="0.01" required />
+        </label>
+        <label>Soil pH
+          <input type="number" id="ph" min="3.5" max="9.9" step="0.01" required />
+        </label>
+        <label>Rainfall (mm)
+          <input type="number" id="rainfall" min="20.2" max="298.6" step="0.1" required />
+        </label>
+      </form>
+      <div class="action-row">
+        <button id="submitBtn" class="btn btn-primary" type="button">Get Recommendation</button>
+        <button id="resetBtn" class="btn btn-ghost" type="button">Reset</button>
+      </div>
+      <p id="errorMsg" class="error-text" hidden></p>
+    </article>
+
+    <article class="panel-card" id="resultSection" hidden>
+      <h3>Prediction Result</h3>
+      <div class="result-banner" id="resultBanner">
+        <div class="result-emoji" id="resultEmoji">🌱</div>
+        <div>
+          <p class="tiny">Recommended Crop</p>
+          <h2 id="resultCrop">-</h2>
+          <p id="resultDesc">-</p>
+        </div>
+      </div>
+      <div>
+        <h4>Top 5 Predictions</h4>
+        <div id="probBars"></div>
+      </div>
+    </article>
+  </div>
+
+  <section class="section-gap">
+    <h3>Quick Fill Samples</h3>
+    <div class="sample-grid">
+      <button class="sample-pill" data-sample="rice">Rice</button>
+      <button class="sample-pill" data-sample="mango">Mango</button>
+      <button class="sample-pill" data-sample="cotton">Cotton</button>
+      <button class="sample-pill" data-sample="coffee">Coffee</button>
+      <button class="sample-pill" data-sample="apple">Apple</button>
+    </div>
+  </section>
+</section>
+
+<script src="{{ url_for('static', filename='js/predict.js') }}"></script>
+{% endblock %}
