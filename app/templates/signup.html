@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up | {{ app_name }}{% endblock %}
+
+{% block content %}
+<section class="shell section-gap auth-wrap">
+  <article class="panel-card auth-card reveal is-visible">
+    <p class="kicker">Create Account</p>
+    <h1>Sign up</h1>
+    <p class="tiny">Create your account and verify it with OTP.</p>
+
+    <form method="post" class="auth-form" autocomplete="off">
+      <label>Email address
+        <input type="email" name="email" placeholder="name@example.com" required />
+      </label>
+      <label>Password
+        <input type="password" name="password" placeholder="Minimum 8 characters" required />
+      </label>
+      <label>Confirm Password
+        <input type="password" name="confirm_password" placeholder="Re-enter password" required />
+      </label>
+      <button type="submit" class="btn btn-primary">Create Account</button>
+    </form>
+
+    <p class="auth-alt">Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
+  </article>
+</section>
+{% endblock %}
