@@ -44,8 +44,15 @@ login_manager.login_view = "login"
 login_manager.login_message = "Please log in to continue."
 
 # ── Load model once at startup ────────────────────────────────────────────────
-model   = joblib.load(os.path.join(MODELS_DIR, "crop_model.pkl"))
-le      = joblib.load(os.path.join(MODELS_DIR, "label_encoder.pkl"))
+model = None
+le = None
+MODEL_LOAD_ERROR = None
+try:
+    model = joblib.load(os.path.join(MODELS_DIR, "crop_model.pkl"))
+    le = joblib.load(os.path.join(MODELS_DIR, "label_encoder.pkl"))
+except Exception as exc:
+    MODEL_LOAD_ERROR = str(exc)
+    print(f"[MODEL LOAD ERROR] {MODEL_LOAD_ERROR}")
 
 # ── Crop details ──────────────────────────────────────────────────────────────
 CROP_INFO = {
@@ -560,6 +567,10 @@ def model_artifact(filename: str):
 @login_required
 def predict():
     try:
+        if model is None or le is None:
+            err = MODEL_LOAD_ERROR or "Model artifacts are unavailable on this server."
+            return jsonify({"success": False, "error": err}), 503
+
         data = request.get_json()
         features = [
             float(data["N"]),
