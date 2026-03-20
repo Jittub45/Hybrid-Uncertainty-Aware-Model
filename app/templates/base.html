@@ -74,6 +74,25 @@
     <div class="shell footer-bottom">{{ year }} · Built for smart farming decisions</div>
   </footer>
 
+  <button id="chatbotLauncher" class="chatbot-launcher" type="button" aria-controls="chatbotPanel" aria-expanded="false" aria-label="Open chatbot assistant">
+    Chat
+  </button>
+
+  <section id="chatbotPanel" class="chatbot-panel" aria-hidden="true" aria-label="Chatbot assistant">
+    <header class="chatbot-head">
+      <h3>Farm Assistant</h3>
+      <button id="chatbotMinimize" type="button" class="chatbot-control" aria-label="Minimize chatbot">_</button>
+    </header>
+    <div id="chatbotThread" class="chatbot-thread">
+      <div class="chatbot-msg bot">Hello. Ask me about crop prediction, soil requirements, or model insights.</div>
+    </div>
+    <form id="chatbotForm" class="chatbot-form">
+      <input id="chatbotInput" type="text" maxlength="500" placeholder="Type your question..." autocomplete="off" />
+      <button type="submit" class="btn btn-primary">Send</button>
+    </form>
+    <div id="chatbotResizeHandle" class="chatbot-resize-handle" aria-hidden="true"></div>
+  </section>
+
   <script>
     const navToggle = document.getElementById("navToggle");
     const siteNav = document.getElementById("siteNav");
@@ -107,5 +126,6 @@
       revealTargets.forEach((el) => el.classList.add("is-visible"));
     }
   </script>
+  <script defer src="{{ url_for('static', filename='js/chatbot/widget.js', v='20260321') }}"></script>
 </body>
 </html>

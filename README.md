@@ -174,12 +174,29 @@ cd "Capstone Project"
 pip install -e .
 pip install lightgbm catboost flask shap   # not yet in pyproject.toml
 
+# Gemini chatbot dependency (if using requirements.txt this is already included)
+pip install google-generativeai
+
 # 3. Train the full pipeline (generates model artifacts)
 python notebooks/train.py
 
 # 4. Launch the web application
 python app/flask_app.py
 ```
+
+### Gemini Chatbot Configuration
+
+This project chatbot now uses Gemini API with a project-context prompt template.
+
+1. Create `.env` from `.env.example`
+2. Set your Gemini key:
+
+```bash
+GEMINI_API_KEY=your_actual_key
+GEMINI_MODEL=gemini-1.5-flash
+```
+
+If `GEMINI_API_KEY` is missing, chatbot will return a configuration message instead of rule-based replies.
 
 Then open **http://127.0.0.1:5000** in your browser.
 

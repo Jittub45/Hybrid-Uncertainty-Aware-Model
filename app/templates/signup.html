@@ -10,12 +10,25 @@
     <p class="tiny">Create your account and verify it with OTP.</p>
 
     <form method="post" class="auth-form" autocomplete="off">
+      <label>Farmer Name
+        <input type="text" name="farmer_name" placeholder="Your full name" value="{{ request.form.get('farmer_name', '') }}" required />
+      </label>
+      <label>Number of Acres
+        <input type="number" name="land_acres" placeholder="e.g. 12.5" min="0.1" step="0.1" value="{{ request.form.get('land_acres', '') }}" required />
+      </label>
+      <label>Years of Farming Experience
+        <input type="number" name="years_farming" placeholder="e.g. 8" min="0" step="1" value="{{ request.form.get('years_farming', '') }}" required />
+      </label>
+      <label>Phone Number
+        <input type="tel" name="phone_number" placeholder="e.g. +91 9876543210" value="{{ request.form.get('phone_number', '') }}" required />
+      </label>
       <label>Email address
-        <input type="email" name="email" placeholder="name@example.com" required />
+        <input type="email" name="email" placeholder="name@example.com" value="{{ request.form.get('email', '') }}" required />
       </label>
       <label>Password
-        <input type="password" name="password" placeholder="Minimum 8 characters" required />
+        <input type="password" id="password" name="password" placeholder="At least 8 chars with upper, lower, digit, special" required />
       </label>
+      <p id="passwordStrength" class="tiny strength-note">Password Strength: -</p>
       <label>Confirm Password
         <input type="password" name="confirm_password" placeholder="Re-enter password" required />
       </label>
@@ -25,4 +38,29 @@
     <p class="auth-alt">Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
   </article>
 </section>
+
+<script>
+  const passwordInput = document.getElementById("password");
+  const strengthText = document.getElementById("passwordStrength");
+
+  function getStrength(value) {
+    let score = 0;
+    if (value.length >= 8) score += 1;
+    if (/[A-Z]/.test(value)) score += 1;
+    if (/[a-z]/.test(value)) score += 1;
+    if (/[0-9]/.test(value)) score += 1;
+    if (/[!@#$%^&*()\-_=+\[\]{};:,.?/]/.test(value)) score += 1;
+
+    if (!value) return ["-", "neutral"];
+    if (score <= 2) return ["Weak", "weak"];
+    if (score === 3 || score === 4) return ["Medium", "medium"];
+    return ["Strong", "strong"];
+  }
+
+  passwordInput?.addEventListener("input", (event) => {
+    const [label, tone] = getStrength(event.target.value || "");
+    strengthText.textContent = `Password Strength: ${label}`;
+    strengthText.dataset.tone = tone;
+  });
+</script>
 {% endblock %}

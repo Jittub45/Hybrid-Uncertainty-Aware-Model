@@ -14,18 +14,23 @@ from email.message import EmailMessage
 import secrets
 import re
 import numpy as np
+import pandas as pd
 import joblib
 from flask import Flask, render_template, request, jsonify, abort, send_from_directory
 from flask import redirect, url_for, flash, session
 from flask_login import LoginManager, UserMixin, current_user, login_required, login_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 from dotenv import load_dotenv
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, log_loss, top_k_accuracy_score
 from werkzeug.security import check_password_hash, generate_password_hash
+from chatbot import generate_chatbot_reply
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 BASE_DIR   = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODELS_DIR = os.path.join(BASE_DIR, "models")
 TMPL_DIR   = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
+DATA_PATH  = os.path.join(BASE_DIR, "data", "Crop_recommendation.csv")
 
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
@@ -47,6 +52,7 @@ login_manager.login_message = "Please log in to continue."
 model = None
 le = None
 MODEL_LOAD_ERROR = None
+INSIGHT_METRICS_CACHE = None
 try:
     model = joblib.load(os.path.join(MODELS_DIR, "crop_model.pkl"))
     le = joblib.load(os.path.join(MODELS_DIR, "label_encoder.pkl"))
@@ -114,6 +120,7 @@ OTP_EXP_MINUTES = 10
 OTP_MAX_ATTEMPTS = 5
 OTP_RESEND_COOLDOWN_SECONDS = 30
 EMAIL_RE = re.compile(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$")
+PHONE_RE = re.compile(r"^[0-9+\-\s]{10,20}$")
 
 
 def _smtp_configured() -> bool:
@@ -130,6 +137,10 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
+    farmer_name = db.Column(db.String(120), nullable=True)
+    land_acres = db.Column(db.Float, nullable=True)
+    years_farming = db.Column(db.Integer, nullable=True)
+    phone_number = db.Column(db.String(24), nullable=True)
     is_verified = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.utcnow())
     last_login_at = db.Column(db.DateTime, nullable=True)
@@ -164,15 +175,45 @@ def _now_utc() -> datetime:
 def _password_valid(password: str) -> tuple:
     if len(password) < 8:
         return False, "Password must be at least 8 characters."
+    if not any(ch.isupper() for ch in password):
+        return False, "Password must contain at least one uppercase letter."
+    if not any(ch.islower() for ch in password):
+        return False, "Password must contain at least one lowercase letter."
     if not any(ch.isdigit() for ch in password):
         return False, "Password must contain at least one digit."
-    if not any(ch.isalpha() for ch in password):
-        return False, "Password must contain at least one letter."
+    if not any(ch in "!@#$%^&*()-_=+[]{};:,.?/" for ch in password):
+        return False, "Password must contain at least one special character."
     return True, ""
 
 
 def _email_valid(email: str) -> bool:
     return bool(EMAIL_RE.match(email or ""))
+
+
+def _phone_valid(phone_number: str) -> bool:
+    if not phone_number:
+        return False
+    compact = phone_number.replace(" ", "")
+    digit_count = sum(ch.isdigit() for ch in compact)
+    return bool(PHONE_RE.match(phone_number)) and 10 <= digit_count <= 15
+
+
+def _ensure_users_table_columns() -> None:
+    required_columns = {
+        "farmer_name": "VARCHAR(120)",
+        "land_acres": "FLOAT",
+        "years_farming": "INTEGER",
+        "phone_number": "VARCHAR(24)",
+    }
+
+    existing = db.session.execute(text("PRAGMA table_info(users)")).mappings().all()
+    existing_names = {row.get("name") for row in existing}
+
+    for col_name, col_type in required_columns.items():
+        if col_name not in existing_names:
+            db.session.execute(text(f"ALTER TABLE users ADD COLUMN {col_name} {col_type}"))
+
+    db.session.commit()
 
 
 def _generate_otp_code() -> str:
@@ -266,6 +307,7 @@ def _verify_otp(user_id: int, purpose: str, otp_code: str) -> tuple:
 
 with app.app_context():
     db.create_all()
+    _ensure_users_table_columns()
 
 
 def _insight_images() -> list:
@@ -316,6 +358,46 @@ def _insight_artifacts() -> list:
     return artifacts
 
 
+def _insight_metrics() -> tuple:
+    global INSIGHT_METRICS_CACHE
+
+    if INSIGHT_METRICS_CACHE is not None:
+        return INSIGHT_METRICS_CACHE
+
+    if model is None or le is None:
+        return [], MODEL_LOAD_ERROR or "Model artifacts are unavailable on this server."
+
+    if not os.path.exists(DATA_PATH):
+        return [], "Dataset file not found for metrics calculation."
+
+    try:
+        df = pd.read_csv(DATA_PATH)
+        features = ["N", "P", "K", "temperature", "humidity", "ph", "rainfall"]
+        for col in features + ["label"]:
+            if col not in df.columns:
+                return [], f"Missing required column in dataset: {col}"
+
+        X = df[features].to_numpy(dtype=float)
+        y_true = le.transform(df["label"].astype(str).to_numpy())
+        y_pred = model.predict(X)
+        y_proba = model.predict_proba(X)
+
+        metric_items = [
+            {"label": "Accuracy", "value": f"{accuracy_score(y_true, y_pred) * 100:.2f}%", "tone": "good"},
+            {"label": "Macro Precision", "value": f"{precision_score(y_true, y_pred, average='macro', zero_division=0):.4f}", "tone": "good"},
+            {"label": "Macro Recall", "value": f"{recall_score(y_true, y_pred, average='macro', zero_division=0):.4f}", "tone": "good"},
+            {"label": "Macro F1", "value": f"{f1_score(y_true, y_pred, average='macro', zero_division=0):.4f}", "tone": "good"},
+            {"label": "Top-3 Accuracy", "value": f"{top_k_accuracy_score(y_true, y_proba, k=3, labels=np.arange(len(le.classes_))) * 100:.2f}%", "tone": "info"},
+            {"label": "Log Loss", "value": f"{log_loss(y_true, y_proba, labels=np.arange(len(le.classes_))):.4f}", "tone": "warn"},
+            {"label": "Samples", "value": f"{len(df):,}", "tone": "info"},
+            {"label": "Classes", "value": f"{len(le.classes_)}", "tone": "info"},
+        ]
+        INSIGHT_METRICS_CACHE = (metric_items, "")
+        return INSIGHT_METRICS_CACHE
+    except Exception as exc:
+        return [], f"Could not compute metrics: {exc}"
+
+
 @app.context_processor
 def inject_globals():
     return {"app_name": "Precision Crop Recommender", "year": 2026}
@@ -347,7 +429,8 @@ def crops_page():
 @app.route("/insights")
 @login_required
 def insights_page():
-    return render_template("insights.html", artifacts=_insight_artifacts())
+    metrics, metrics_error = _insight_metrics()
+    return render_template("insights.html", artifacts=_insight_artifacts(), metrics=metrics, metrics_error=metrics_error)
 
 
 @app.route("/about")
@@ -363,12 +446,51 @@ def signup():
         return redirect(url_for("recommend_page"))
 
     if request.method == "POST":
+        farmer_name = (request.form.get("farmer_name") or "").strip()
+        land_acres_raw = (request.form.get("land_acres") or "").strip()
+        years_farming_raw = (request.form.get("years_farming") or "").strip()
+        phone_number = (request.form.get("phone_number") or "").strip()
         email = (request.form.get("email") or "").strip().lower()
         password = request.form.get("password") or ""
         confirm_password = request.form.get("confirm_password") or ""
 
-        if not email or not password or not confirm_password:
+        if (
+            not farmer_name
+            or not land_acres_raw
+            or not years_farming_raw
+            or not phone_number
+            or not email
+            or not password
+            or not confirm_password
+        ):
             flash("All fields are required.", "error")
+            return render_template("signup.html")
+
+        if len(farmer_name) < 2:
+            flash("Farmer name must be at least 2 characters.", "error")
+            return render_template("signup.html")
+
+        try:
+            land_acres = float(land_acres_raw)
+        except ValueError:
+            flash("Number of acres must be a valid number.", "error")
+            return render_template("signup.html")
+
+        if land_acres <= 0 or land_acres > 100000:
+            flash("Number of acres must be between 0 and 100000.", "error")
+            return render_template("signup.html")
+
+        if not years_farming_raw.isdigit():
+            flash("Years of farming must be a whole number.", "error")
+            return render_template("signup.html")
+
+        years_farming = int(years_farming_raw)
+        if years_farming < 0 or years_farming > 80:
+            flash("Years of farming must be between 0 and 80.", "error")
+            return render_template("signup.html")
+
+        if not _phone_valid(phone_number):
+            flash("Please enter a valid phone number (10-15 digits).", "error")
             return render_template("signup.html")
 
         if not _email_valid(email):
@@ -390,6 +512,13 @@ def signup():
                 flash("Account already exists. Please log in.", "error")
                 return redirect(url_for("login"))
 
+            existing_user.farmer_name = farmer_name
+            existing_user.land_acres = land_acres
+            existing_user.years_farming = years_farming
+            existing_user.phone_number = phone_number
+            existing_user.password_hash = generate_password_hash(password)
+            db.session.commit()
+
             otp_code = _create_otp_challenge(existing_user.id, "signup_verify")
             sent = _send_otp_email(existing_user.email, otp_code, "signup_verify")
             if not sent:
@@ -403,6 +532,10 @@ def signup():
             return redirect(url_for("verify_otp"))
 
         user = User(
+            farmer_name=farmer_name,
+            land_acres=land_acres,
+            years_farming=years_farming,
+            phone_number=phone_number,
             email=email,
             password_hash=generate_password_hash(password),
             is_verified=False,
@@ -604,6 +737,18 @@ def predict():
         })
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400
+
+
+@app.route("/chatbot/message", methods=["POST"])
+def chatbot_message():
+    payload = request.get_json(silent=True) or {}
+    message = str(payload.get("message", "")).strip()
+
+    if len(message) > 500:
+        return jsonify({"success": False, "error": "Message is too long. Use 500 characters or less."}), 400
+
+    bot_response = generate_chatbot_reply(message, CROP_INFO, CROP_LIBRARY)
+    return jsonify({"success": True, **bot_response})
 
 
 if __name__ == "__main__":

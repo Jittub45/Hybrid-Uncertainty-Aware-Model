@@ -9,7 +9,7 @@
       <p class="kicker">Hybrid ML for agriculture</p>
       <h1>Grow the right crop with data, not guesswork.</h1>
       <p class="hero-copy">
-        Enter 7 soil and climate inputs, get crop recommendations in seconds, and explore model transparency using explainable AI charts.
+        Enter 7 soil and climate inputs, get crop recommendations in seconds, and rely on a now-expanded training dataset for stronger and more stable predictions.
       </p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="{{ url_for('recommend_page') }}">Start Prediction</a>
@@ -20,9 +20,10 @@
       <h3>System Snapshot</h3>
       <ul>
         <li>22 supported crop classes</li>
-        <li>2200 training samples</li>
+        <li>11,001 training samples</li>
         <li>Top-5 ranked predictions</li>
         <li>SHAP-driven explainability</li>
+        <li>Farmer profile based signup</li>
       </ul>
     </div>
   </div>
@@ -31,7 +32,7 @@
 <section class="shell stats-grid section-gap reveal">
   <article class="stat-card"><h2>22</h2><p>Crop Varieties</p></article>
   <article class="stat-card"><h2>7</h2><p>Input Parameters</p></article>
-  <article class="stat-card"><h2>2200</h2><p>Training Samples</p></article>
+  <article class="stat-card"><h2>11,001</h2><p>Training Samples</p></article>
   <article class="stat-card"><h2>Top-5</h2><p>Confidence Output</p></article>
 </section>
 
@@ -40,7 +41,7 @@
   <div class="cards-3 home-links">
     <a class="panel-card linked-card" href="{{ url_for('recommend_page') }}">
       <h3>Go to Prediction Lab</h3>
-      <p>Enter field measurements and get the most suitable crop plus confidence scores.</p>
+      <p>Enter field measurements and get the most suitable crop plus confidence scores from the updated data-backed model.</p>
       <span class="card-cta">Open Predict Crop</span>
     </a>
     <a class="panel-card linked-card" href="{{ url_for('crops_page') }}">
@@ -50,7 +51,7 @@
     </a>
     <a class="panel-card linked-card" href="{{ url_for('insights_page') }}">
       <h3>Review Model Insights</h3>
-      <p>Understand performance and feature influence using confusion matrices and SHAP views.</p>
+      <p>Understand performance and feature influence using confusion matrices and SHAP views over the expanded dataset.</p>
       <span class="card-cta">Open Insights</span>
     </a>
   </div>

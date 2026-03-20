@@ -14,33 +14,45 @@
     <input id="cropSearch" type="search" placeholder="Search crop name..." />
   </div>
 
-  <div class="crop-grid" id="cropGrid">
-    {% for crop in crops %}
-    <article class="crop-card" data-name="{{ crop.name }}">
-      <div class="crop-head">
-        <span class="crop-emoji">{{ crop.emoji }}</span>
-        <h3>{{ crop.name|capitalize }}</h3>
-      </div>
-      <p>{{ crop.desc }}</p>
-      <dl>
-        <dt>Soil</dt><dd>{{ crop.soil }}</dd>
-        <dt>pH</dt><dd>{{ crop.ph }}</dd>
-        <dt>Rainfall</dt><dd>{{ crop.rain }}</dd>
-        <dt>Temperature</dt><dd>{{ crop.temp }}</dd>
-      </dl>
-    </article>
-    {% endfor %}
+  <div class="crop-table-wrap panel-card">
+    <table class="crop-table" id="cropTable">
+      <thead>
+        <tr>
+          <th>Crop</th>
+          <th>Description</th>
+          <th>Soil</th>
+          <th>pH</th>
+          <th>Rainfall</th>
+          <th>Temperature</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for crop in crops %}
+        <tr class="crop-row" data-name="{{ crop.name }}">
+          <td class="crop-name-cell">
+            <span class="crop-emoji">{{ crop.emoji }}</span>
+            <strong>{{ crop.name|capitalize }}</strong>
+          </td>
+          <td class="crop-desc-cell">{{ crop.desc }}</td>
+          <td><span class="table-pill soil-pill">{{ crop.soil }}</span></td>
+          <td><span class="table-pill ph-pill">{{ crop.ph }}</span></td>
+          <td><span class="table-pill rain-pill">{{ crop.rain }}</span></td>
+          <td><span class="table-pill temp-pill">{{ crop.temp }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </section>
 
 <script>
   const cropSearch = document.getElementById('cropSearch');
-  const cards = document.querySelectorAll('.crop-card');
+  const rows = document.querySelectorAll('.crop-row');
   cropSearch?.addEventListener('input', (e) => {
     const q = e.target.value.trim().toLowerCase();
-    cards.forEach((card) => {
-      const match = card.dataset.name.includes(q);
-      card.style.display = match ? 'block' : 'none';
+    rows.forEach((row) => {
+      const match = row.dataset.name.includes(q);
+      row.style.display = match ? '' : 'none';
     });
   });
 </script>
