@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, Tuple
+from typing import Any, Dict
 
 
 DEFAULT_SUGGESTIONS = [
@@ -7,6 +7,49 @@ DEFAULT_SUGGESTIONS = [
     "Explain model insights",
     "Tell me about rice",
 ]
+
+
+TRANSLATOR_LANG_MAP = {
+    "en": "en",
+    "hi": "hi",
+    "gu": "gu",
+    "mr": "mr",
+    "pa": "pa",
+    "ta": "ta",
+    "te": "te",
+    "kn": "kn",
+    "bn": "bn",
+    "or": "or",
+    "as": "as",
+    "brx": "hi",
+    "doi": "hi",
+    "gom": "mr",
+    "ks": "ur",
+    "mai": "hi",
+    "ml": "ml",
+    "mni": "bn",
+    "ne": "ne",
+    "sa": "hi",
+    "sat": "hi",
+    "sd": "sd",
+    "ur": "ur",
+}
+
+
+def _translate_text(text: str, target_lang: str) -> str:
+    if not text:
+        return ""
+    target_lang = (target_lang or "en").split("-")[0].lower()
+    if target_lang == "en":
+        return text
+
+    try:
+        from deep_translator import GoogleTranslator  # type: ignore
+
+        target = TRANSLATOR_LANG_MAP.get(target_lang, "en")
+        return GoogleTranslator(source="auto", target=target).translate(text)
+    except Exception:
+        return text
 
 
 def _build_project_context(crop_info: Dict[str, Dict[str, str]], crop_library: Dict[str, Dict[str, str]]) -> str:
@@ -91,32 +134,36 @@ def _generate_with_gemini(prompt: str) -> str:
     return text
 
 
-def generate_chatbot_reply(message: str, crop_info: Dict[str, Dict[str, str]], crop_library: Dict[str, Dict[str, str]]) -> Dict[str, Any]:
+def generate_chatbot_reply(message: str, crop_info: Dict[str, Dict[str, str]], crop_library: Dict[str, Dict[str, str]], lang: str = "en") -> Dict[str, Any]:
     user_message = (message or "").strip()
     if not user_message:
         return {
-            "reply": "Please type a question so I can help.",
-            "suggestions": DEFAULT_SUGGESTIONS,
+            "reply": _translate_text("Please type a question so I can help.", lang),
+            "suggestions": [_translate_text(item, lang) for item in DEFAULT_SUGGESTIONS],
         }
 
+    user_message_en = _translate_text(user_message, "en") if lang != "en" else user_message
+
     project_context = _build_project_context(crop_info, crop_library)
-    prompt = _build_prompt_template(project_context, user_message)
+    prompt = _build_prompt_template(project_context, user_message_en)
 
     try:
         answer = _generate_with_gemini(prompt)
+        final_answer = _translate_text(answer, lang) if lang != "en" else answer
         return {
-            "reply": answer,
-            "suggestions": DEFAULT_SUGGESTIONS,
+            "reply": final_answer,
+            "suggestions": [_translate_text(item, lang) for item in DEFAULT_SUGGESTIONS],
         }
     except Exception as exc:
+        fallback_text = (
+            "I could not generate an AI response right now. "
+            f"Reason: {exc}"
+        )
         return {
-            "reply": (
-                "I could not generate an AI response right now. "
-                f"Reason: {exc}"
-            ),
+            "reply": _translate_text(fallback_text, lang),
             "suggestions": [
-                "Set GEMINI_API_KEY in .env",
-                "How do I predict a crop?",
-                "Open crop library",
+                _translate_text("Set GEMINI_API_KEY in .env", lang),
+                _translate_text("How do I predict a crop?", lang),
+                _translate_text("Open crop library", lang),
             ],
         }
