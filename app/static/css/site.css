@@ -73,6 +73,25 @@ code, pre { font-family: Consolas, "Courier New", monospace; }
 }
 
 .site-nav { display: flex; gap: 8px; flex-wrap: wrap; }
+.lang-wrap {
+  align-self: center;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-left: 4px;
+}
+
+.lang-select {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: #fff;
+  color: var(--ink);
+}
 .site-nav a {
   padding: 8px 10px;
   border-radius: 999px;
@@ -673,6 +692,8 @@ pre {
   }
   .site-nav.is-open { display: flex; }
   .site-nav a { text-align: center; }
+  .lang-wrap { text-align: center; margin-top: 4px; }
+  .lang-select { width: 100%; border-radius: 10px; }
   .nav-logout { width: 100%; text-align: center; }
 }
 

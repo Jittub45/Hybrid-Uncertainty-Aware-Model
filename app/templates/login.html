@@ -1,25 +1,25 @@
 {% extends "base.html" %}
 
-{% block title %}Login | {{ app_name }}{% endblock %}
+{% block title %}{{ tr("Login") }} | {{ app_name }}{% endblock %}
 
 {% block content %}
 <section class="shell section-gap auth-wrap">
   <article class="panel-card auth-card reveal is-visible">
-    <p class="kicker">Welcome Back</p>
-    <h1>Login</h1>
-    <p class="tiny">Enter your email and password to login. OTP is required only if your account is not verified yet.</p>
+    <p class="kicker">{{ tr("Welcome Back") }}</p>
+    <h1>{{ tr("Login") }}</h1>
+    <p class="tiny">{{ tr("Enter your email and password to login. OTP is required only if your account is not verified yet.") }}</p>
 
     <form method="post" class="auth-form" autocomplete="off">
-      <label>Email address
-        <input type="email" name="email" placeholder="name@example.com" required />
+      <label>{{ tr("Email address") }}
+        <input type="email" name="email" placeholder="{{ tr('name@example.com') }}" required />
       </label>
-      <label>Password
-        <input type="password" name="password" placeholder="Your password" required />
+      <label>{{ tr("Password") }}
+        <input type="password" name="password" placeholder="{{ tr('Your password') }}" required />
       </label>
-      <button type="submit" class="btn btn-primary">Login</button>
+      <button type="submit" class="btn btn-primary">{{ tr("Login") }}</button>
     </form>
 
-    <p class="auth-alt">New here? <a href="{{ url_for('signup') }}">Create account</a></p>
+    <p class="auth-alt">{{ tr("New here?") }} <a href="{{ url_for('signup') }}">{{ tr("Create account") }}</a></p>
   </article>
 </section>
 {% endblock %}

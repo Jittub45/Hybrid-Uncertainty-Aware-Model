@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}{{ tr("Government Schemes") }} | {{ app_name }}{% endblock %}
+
+{% block content %}
+<section class="shell section-gap">
+  <div class="page-head">
+    <p class="kicker">{{ tr("Financial Support") }}</p>
+    <h1>{{ tr("Government Schemes Browser") }}</h1>
+    <p>{{ tr("Browse central and state agriculture schemes with multilingual details and practical filters.") }}</p>
+  </div>
+
+  <article class="panel-card">
+    <h3>{{ tr("Find Schemes") }}</h3>
+    <form id="schemesForm" class="form-grid" onsubmit="return false;">
+      <label>{{ tr("Keyword") }}
+        <input type="text" id="schemeKeyword" placeholder="{{ tr('e.g. irrigation, insurance, subsidy') }}" />
+      </label>
+      <label>{{ tr("State") }}
+        <select id="schemeState">
+          <option value="">{{ tr("All India") }}</option>
+        </select>
+      </label>
+      <label>{{ tr("Category") }}
+        <select id="schemeCategory">
+          <option value="">{{ tr("All Categories") }}</option>
+        </select>
+      </label>
+      <label>{{ tr("Farmer Type") }}
+        <select id="schemeFarmerType">
+          <option value="">{{ tr("Any") }}</option>
+        </select>
+      </label>
+      <label>{{ tr("Income Level") }}
+        <select id="schemeIncomeLevel">
+          <option value="">{{ tr("Any") }}</option>
+        </select>
+      </label>
+      <label>{{ tr("Land Size") }}
+        <select id="schemeLandSize">
+          <option value="">{{ tr("Any") }}</option>
+        </select>
+      </label>
+    </form>
+    <div class="action-row">
+      <button id="schemeSearchBtn" class="btn btn-primary" type="button">{{ tr("Search Schemes") }}</button>
+      <button id="schemeResetBtn" class="btn btn-ghost" type="button">{{ tr("Reset") }}</button>
+    </div>
+    <p id="schemeSummary" class="tiny"></p>
+    <p id="schemeError" class="error-text" hidden></p>
+  </article>
+
+  <section id="schemesResults" class="cards-2 section-gap"></section>
+</section>
+
+<script id="schemesI18n" type="application/json">{{ {
+  "loading": tr("Loading schemes..."),
+  "searching": tr("Searching..."),
+  "total": tr("Total schemes found"),
+  "noResults": tr("No schemes found for the selected filters."),
+  "desc": tr("Description"),
+  "benefits": tr("Benefits"),
+  "eligibility": tr("Eligibility"),
+  "states": tr("States"),
+  "categories": tr("Categories"),
+  "viewDetails": tr("View Details")
+}|tojson }}</script>
+<script>
+  window.APP_LANG = "{{ current_lang }}";
+</script>
+<script src="{{ url_for('static', filename='js/schemes.js', v='20260416') }}"></script>
+{% endblock %}

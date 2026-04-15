@@ -1,4 +1,5 @@
 (function () {
+  const body = document.body;
   const launcher = document.getElementById("chatbotLauncher");
   const panel = document.getElementById("chatbotPanel");
   const minimizeBtn =
@@ -14,10 +15,32 @@
     return;
   }
 
+  const userId = body?.dataset?.chatbotUserId || "guest";
+  const storageKey = `chatbot-panel-state:${userId}`;
+  const forceOpenOnLoad = panel.dataset.forceOpen === "true";
+  const currentLang = (document.documentElement.lang || "en").toLowerCase();
+
+  function readStoredState() {
+    try {
+      return window.localStorage.getItem(storageKey);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function saveState(isOpen) {
+    try {
+      window.localStorage.setItem(storageKey, isOpen ? "open" : "minimized");
+    } catch (error) {
+      // Ignore storage failures (private mode / browser restrictions).
+    }
+  }
+
   function setOpenState(isOpen) {
     panel.classList.toggle("is-open", isOpen);
     launcher.setAttribute("aria-expanded", String(isOpen));
     panel.setAttribute("aria-hidden", String(!isOpen));
+    saveState(isOpen);
     if (isOpen) {
       window.setTimeout(() => input.focus(), 50);
     }
@@ -118,7 +141,7 @@
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ message, lang: currentLang }),
       });
 
       const data = await response.json();
@@ -158,6 +181,7 @@
 
   enableResize();
 
-  // Open in expanded mode when the page loads.
-  setOpenState(true);
+  const storedState = readStoredState();
+  const shouldOpen = forceOpenOnLoad || storedState !== "minimized";
+  setOpenState(shouldOpen);
 })();

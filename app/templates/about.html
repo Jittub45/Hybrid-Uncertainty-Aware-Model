@@ -1,39 +1,38 @@
 {% extends "base.html" %}
 
-{% block title %}About | {{ app_name }}{% endblock %}
+{% block title %}{{ tr("About") }} | {{ app_name }}{% endblock %}
 
 {% block content %}
 <section class="shell section-gap">
   <div class="page-head">
-    <p class="kicker">Project</p>
-    <h1>About This System</h1>
-    <p>Decision support platform for crop recommendation using machine learning and explainability.</p>
+    <p class="kicker">{{ tr("Project") }}</p>
+    <h1>{{ tr("About This System") }}</h1>
+    <p>{{ tr("Decision support platform for crop recommendation using machine learning and explainability.") }}</p>
   </div>
 
   <div class="cards-2">
     <article class="panel-card">
-      <h3>Problem Statement</h3>
+      <h3>{{ tr("Problem Statement") }}</h3>
       <p>
-        Farmers often choose crops through intuition or local habit. This system adds a data-assisted recommendation
-        layer based on measurable soil and climate conditions.
+        {{ tr("Farmers often choose crops through intuition or local habit. This system adds a data-assisted recommendation layer based on measurable soil and climate conditions.") }}
       </p>
-      <h3>Core Inputs</h3>
+      <h3>{{ tr("Core Inputs") }}</h3>
       <ul class="clean-list">
-        <li>Nitrogen, Phosphorus, Potassium</li>
-        <li>Temperature, Humidity, Soil pH, Rainfall</li>
+        <li>{{ tr("Nitrogen, Phosphorus, Potassium") }}</li>
+        <li>{{ tr("Temperature, Humidity, Soil pH, Rainfall") }}</li>
       </ul>
     </article>
 
     <article class="panel-card">
-      <h3>Tech Stack</h3>
+      <h3>{{ tr("Tech Stack") }}</h3>
       <ul class="clean-list">
-        <li>Backend: Flask</li>
-        <li>ML: scikit-learn, XGBoost, LightGBM, CatBoost</li>
-        <li>Explainability: SHAP</li>
-        <li>Deployment: Gunicorn + Render</li>
+        <li>{{ tr("Backend: Flask") }}</li>
+        <li>{{ tr("ML: scikit-learn, XGBoost, LightGBM, CatBoost") }}</li>
+        <li>{{ tr("Explainability: SHAP") }}</li>
+        <li>{{ tr("Deployment: Gunicorn + Render") }}</li>
       </ul>
-      <h3>REST API</h3>
-      <p><code>POST /predict</code> with JSON payload:</p>
+      <h3>{{ tr("REST API") }}</h3>
+      <p><code>POST /predict</code> {{ tr("with JSON payload:") }}</p>
       <pre>{
   "N": 90,
   "P": 42,

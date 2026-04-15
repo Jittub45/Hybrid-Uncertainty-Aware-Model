@@ -11,6 +11,8 @@ const submitBtn = document.getElementById("submitBtn");
 const resetBtn = document.getElementById("resetBtn");
 const errorMsg = document.getElementById("errorMsg");
 const resultSection = document.getElementById("resultSection");
+const i18nNode = document.getElementById("predictI18n");
+const I18N = i18nNode ? JSON.parse(i18nNode.textContent || "{}") : {};
 
 function setError(msg = "") {
   if (!msg) {
@@ -27,7 +29,7 @@ function formData() {
   for (const f of fields) {
     const val = parseFloat(document.getElementById(f).value);
     if (Number.isNaN(val)) {
-      throw new Error(`Please enter a valid value for ${f}.`);
+      throw new Error(`${I18N.validValuePrefix || "Please enter a valid value for"} ${f}.`);
     }
     data[f] = val;
   }
@@ -73,7 +75,7 @@ function renderResult(data) {
 async function predict() {
   setError();
   submitBtn.disabled = true;
-  submitBtn.textContent = "Analyzing...";
+  submitBtn.textContent = I18N.analyzing || "Analyzing...";
 
   try {
     const payload = formData();
@@ -84,14 +86,14 @@ async function predict() {
     });
     const result = await resp.json();
     if (!result.success) {
-      throw new Error(result.error || "Prediction failed.");
+      throw new Error(result.error || I18N.predictFailed || "Prediction failed.");
     }
     renderResult(result);
   } catch (err) {
-    setError(err.message || "Could not predict crop.");
+    setError(err.message || I18N.predictError || "Could not predict crop.");
   } finally {
     submitBtn.disabled = false;
-    submitBtn.textContent = "Get Recommendation";
+    submitBtn.textContent = I18N.getRecommendation || "Get Recommendation";
   }
 }
 

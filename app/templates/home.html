@@ -1,58 +1,58 @@
 {% extends "base.html" %}
 
-{% block title %}Home | {{ app_name }}{% endblock %}
+{% block title %}{{ tr("Home") }} | {{ app_name }}{% endblock %}
 
 {% block content %}
 <section class="hero-section">
   <div class="shell hero-grid reveal">
     <div>
-      <p class="kicker">Hybrid ML for agriculture</p>
-      <h1>Grow the right crop with data, not guesswork.</h1>
+      <p class="kicker">{{ tr("Hybrid ML for agriculture") }}</p>
+      <h1>{{ tr("Grow the right crop with data, not guesswork.") }}</h1>
       <p class="hero-copy">
-        Enter 7 soil and climate inputs, get crop recommendations in seconds, and rely on a now-expanded training dataset for stronger and more stable predictions.
+        {{ tr("Enter 7 soil and climate inputs, get crop recommendations in seconds, and rely on a now-expanded training dataset for stronger and more stable predictions.") }}
       </p>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="{{ url_for('recommend_page') }}">Start Prediction</a>
-        <a class="btn btn-ghost" href="{{ url_for('insights_page') }}">How The Model Works</a>
+        <a class="btn btn-primary" href="{{ url_for('recommend_page') }}">{{ tr("Start Prediction") }}</a>
+        <a class="btn btn-ghost" href="{{ url_for('insights_page') }}">{{ tr("How The Model Works") }}</a>
       </div>
     </div>
     <div class="hero-panel">
-      <h3>System Snapshot</h3>
+      <h3>{{ tr("System Snapshot") }}</h3>
       <ul>
-        <li>22 supported crop classes</li>
-        <li>11,001 training samples</li>
-        <li>Top-5 ranked predictions</li>
-        <li>SHAP-driven explainability</li>
-        <li>Farmer profile based signup</li>
+        <li>{{ tr("22 supported crop classes") }}</li>
+        <li>{{ tr("11,001 training samples") }}</li>
+        <li>{{ tr("Top-5 ranked predictions") }}</li>
+        <li>{{ tr("SHAP-driven explainability") }}</li>
+        <li>{{ tr("Farmer profile based signup") }}</li>
       </ul>
     </div>
   </div>
 </section>
 
 <section class="shell stats-grid section-gap reveal">
-  <article class="stat-card"><h2>22</h2><p>Crop Varieties</p></article>
-  <article class="stat-card"><h2>7</h2><p>Input Parameters</p></article>
-  <article class="stat-card"><h2>11,001</h2><p>Training Samples</p></article>
-  <article class="stat-card"><h2>Top-5</h2><p>Confidence Output</p></article>
+  <article class="stat-card"><h2>22</h2><p>{{ tr("Crop Varieties") }}</p></article>
+  <article class="stat-card"><h2>7</h2><p>{{ tr("Input Parameters") }}</p></article>
+  <article class="stat-card"><h2>11,001</h2><p>{{ tr("Training Samples") }}</p></article>
+  <article class="stat-card"><h2>Top-5</h2><p>{{ tr("Confidence Output") }}</p></article>
 </section>
 
 <section class="shell section-gap trust-block reveal">
-  <h2>Explore the platform</h2>
+  <h2>{{ tr("Explore the platform") }}</h2>
   <div class="cards-3 home-links">
     <a class="panel-card linked-card" href="{{ url_for('recommend_page') }}">
-      <h3>Go to Prediction Lab</h3>
-      <p>Enter field measurements and get the most suitable crop plus confidence scores from the updated data-backed model.</p>
-      <span class="card-cta">Open Predict Crop</span>
+      <h3>{{ tr("Go to Prediction Lab") }}</h3>
+      <p>{{ tr("Enter field measurements and get the most suitable crop plus confidence scores from the updated data-backed model.") }}</p>
+      <span class="card-cta">{{ tr("Open Predict Crop") }}</span>
     </a>
     <a class="panel-card linked-card" href="{{ url_for('crops_page') }}">
-      <h3>Browse Crop Library</h3>
-      <p>Read crop-wise suitability notes for soil type, pH, rainfall, and temperature.</p>
-      <span class="card-cta">Open Crop Library</span>
+      <h3>{{ tr("Browse Crop Library") }}</h3>
+      <p>{{ tr("Read crop-wise suitability notes for soil type, pH, rainfall, and temperature.") }}</p>
+      <span class="card-cta">{{ tr("Open Crop Library") }}</span>
     </a>
     <a class="panel-card linked-card" href="{{ url_for('insights_page') }}">
-      <h3>Review Model Insights</h3>
-      <p>Understand performance and feature influence using confusion matrices and SHAP views over the expanded dataset.</p>
-      <span class="card-cta">Open Insights</span>
+      <h3>{{ tr("Review Model Insights") }}</h3>
+      <p>{{ tr("Understand performance and feature influence using confusion matrices and SHAP views over the expanded dataset.") }}</p>
+      <span class="card-cta">{{ tr("Open Insights") }}</span>
     </a>
   </div>
 </section>

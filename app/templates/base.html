@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ current_lang }}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,12 +10,12 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/site.css') }}" />
   {% block head %}{% endblock %}
 </head>
-<body>
+<body data-chatbot-user-id="{% if current_user.is_authenticated %}{{ current_user.id }}{% else %}guest{% endif %}">
   <header class="site-header">
     <div class="shell nav-wrap">
       <a class="brand" href="{{ url_for('index') }}">
         <span class="brand-mark">🌾</span>
-        <span class="brand-text">Precision Crop Recommender</span>
+        <span class="brand-text">{{ tr("Precision Crop Recommender") }}</span>
       </a>
       <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="siteNav" aria-label="Toggle navigation menu">
         <span></span>
@@ -23,18 +23,25 @@
         <span></span>
       </button>
       <nav class="site-nav" id="siteNav">
-        <a href="{{ url_for('index') }}" class="{% if request.path == '/' %}active{% endif %}">Home</a>
-        <a href="{{ url_for('recommend_page') }}" class="{% if request.path == '/recommend' %}active{% endif %}">Predict Crop</a>
-        <a href="{{ url_for('crops_page') }}" class="{% if request.path == '/crops' %}active{% endif %}">Crop Library</a>
-        <a href="{{ url_for('insights_page') }}" class="{% if request.path == '/insights' %}active{% endif %}">Model Insights</a>
-        <a href="{{ url_for('about_page') }}" class="{% if request.path == '/about' %}active{% endif %}">About</a>
+        <a href="{{ url_for('index') }}" class="{% if request.path == '/' %}active{% endif %}">{{ tr("Home") }}</a>
+        <a href="{{ url_for('recommend_page') }}" class="{% if request.path == '/recommend' %}active{% endif %}">{{ tr("Predict Crop") }}</a>
+        <a href="{{ url_for('crops_page') }}" class="{% if request.path == '/crops' %}active{% endif %}">{{ tr("Crop Library") }}</a>
+        <a href="{{ url_for('schemes_page') }}" class="{% if request.path == '/schemes' %}active{% endif %}">{{ tr("Schemes") }}</a>
+        <a href="{{ url_for('insights_page') }}" class="{% if request.path == '/insights' %}active{% endif %}">{{ tr("Model Insights") }}</a>
+        <a href="{{ url_for('about_page') }}" class="{% if request.path == '/about' %}active{% endif %}">{{ tr("About") }}</a>
+        <label class="lang-wrap" for="langSelect">{{ tr("Language") }}</label>
+        <select id="langSelect" class="lang-select" aria-label="{{ tr('Select language') }}">
+          {% for code, label in supported_languages.items() %}
+          <option value="{{ code }}" {% if code == current_lang %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
         {% if current_user.is_authenticated %}
         <form method="post" action="{{ url_for('logout') }}" class="nav-form">
-          <button class="nav-logout" type="submit">Logout</button>
+          <button class="nav-logout" type="submit">{{ tr("Logout") }}</button>
         </form>
         {% else %}
-        <a href="{{ url_for('login') }}" class="{% if request.path == '/login' %}active{% endif %}">Login</a>
-        <a href="{{ url_for('signup') }}" class="{% if request.path == '/signup' or request.path == '/register' %}active{% endif %}">Sign Up</a>
+        <a href="{{ url_for('login') }}" class="{% if request.path == '/login' %}active{% endif %}">{{ tr("Login") }}</a>
+        <a href="{{ url_for('signup') }}" class="{% if request.path == '/signup' or request.path == '/register' %}active{% endif %}">{{ tr("Sign Up") }}</a>
         {% endif %}
       </nav>
     </div>
@@ -57,41 +64,43 @@
   <footer class="site-footer">
     <div class="shell footer-grid">
       <div>
-        <h4>Precision Crop Recommender</h4>
-        <p>AI-assisted crop recommendation using soil and climate inputs.</p>
+        <h4>{{ tr("Precision Crop Recommender") }}</h4>
+        <p>{{ tr("AI-assisted crop recommendation using soil and climate inputs.") }}</p>
       </div>
       <div>
-        <h4>Quick Links</h4>
-        <p><a href="{{ url_for('recommend_page') }}">Run Prediction</a></p>
-        <p><a href="{{ url_for('insights_page') }}">See Insights</a></p>
+        <h4>{{ tr("Quick Links") }}</h4>
+        <p><a href="{{ url_for('recommend_page') }}">{{ tr("Run Prediction") }}</a></p>
+        <p><a href="{{ url_for('insights_page') }}">{{ tr("See Insights") }}</a></p>
       </div>
       <div>
         <h4>API</h4>
         <p><code>POST /predict</code></p>
-        <p>Returns top crop and top-5 confidence scores.</p>
+        <p>{{ tr("Returns top crop and top-5 confidence scores.") }}</p>
       </div>
     </div>
-    <div class="shell footer-bottom">{{ year }} · Built for smart farming decisions</div>
+    <div class="shell footer-bottom">{{ year }} · {{ tr("Built for smart farming decisions") }}</div>
   </footer>
 
+  {% if current_user.is_authenticated and request.endpoint not in ['login', 'signup', 'verify_otp'] %}
   <button id="chatbotLauncher" class="chatbot-launcher" type="button" aria-controls="chatbotPanel" aria-expanded="false" aria-label="Open chatbot assistant">
-    Chat
+    {{ tr("Chat") }}
   </button>
 
-  <section id="chatbotPanel" class="chatbot-panel" aria-hidden="true" aria-label="Chatbot assistant">
+  <section id="chatbotPanel" class="chatbot-panel" data-force-open="{{ 'true' if chatbot_force_open else 'false' }}" aria-hidden="true" aria-label="Chatbot assistant">
     <header class="chatbot-head">
-      <h3>Farm Assistant</h3>
+      <h3>{{ tr("Farm Assistant") }}</h3>
       <button id="chatbotMinimize" type="button" class="chatbot-control" aria-label="Minimize chatbot">_</button>
     </header>
     <div id="chatbotThread" class="chatbot-thread">
-      <div class="chatbot-msg bot">Hello. Ask me about crop prediction, soil requirements, or model insights.</div>
+      <div class="chatbot-msg bot">{{ tr("Hello. Ask me about crop prediction, soil requirements, or model insights.") }}</div>
     </div>
     <form id="chatbotForm" class="chatbot-form">
-      <input id="chatbotInput" type="text" maxlength="500" placeholder="Type your question..." autocomplete="off" />
-      <button type="submit" class="btn btn-primary">Send</button>
+      <input id="chatbotInput" type="text" maxlength="500" placeholder="{{ tr('Type your question...') }}" autocomplete="off" />
+      <button type="submit" class="btn btn-primary">{{ tr("Send") }}</button>
     </form>
     <div id="chatbotResizeHandle" class="chatbot-resize-handle" aria-hidden="true"></div>
   </section>
+  {% endif %}
 
   <script>
     const navToggle = document.getElementById("navToggle");
@@ -125,7 +134,24 @@
     } else {
       revealTargets.forEach((el) => el.classList.add("is-visible"));
     }
+
+    const langSelect = document.getElementById("langSelect");
+    langSelect?.addEventListener("change", async () => {
+      const nextLang = langSelect.value;
+      try {
+        await fetch("{{ url_for('set_language') }}", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lang: nextLang }),
+        });
+      } catch (_) {
+        // Ignore; fallback reload will keep previous language.
+      }
+      window.location.reload();
+    });
   </script>
-  <script defer src="{{ url_for('static', filename='js/chatbot/widget.js', v='20260321') }}"></script>
+  {% if current_user.is_authenticated and request.endpoint not in ['login', 'signup', 'verify_otp'] %}
+  <script defer src="{{ url_for('static', filename='js/chatbot/widget.js', v='20260416') }}"></script>
+  {% endif %}
 </body>
 </html>

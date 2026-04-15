@@ -1,29 +1,29 @@
 {% extends "base.html" %}
 
-{% block title %}Crop Library | {{ app_name }}{% endblock %}
+{% block title %}{{ tr("Crop Library") }} | {{ app_name }}{% endblock %}
 
 {% block content %}
 <section class="shell section-gap">
   <div class="page-head">
-    <p class="kicker">Knowledge Base</p>
-    <h1>Crop Library</h1>
-    <p>Explore supported crops and their typical growing preferences.</p>
+    <p class="kicker">{{ tr("Knowledge Base") }}</p>
+    <h1>{{ tr("Crop Library") }}</h1>
+    <p>{{ tr("Explore supported crops and their typical growing preferences.") }}</p>
   </div>
 
   <div class="search-wrap">
-    <input id="cropSearch" type="search" placeholder="Search crop name..." />
+    <input id="cropSearch" type="search" placeholder="{{ tr('Search crop name...') }}" />
   </div>
 
   <div class="crop-table-wrap panel-card">
     <table class="crop-table" id="cropTable">
       <thead>
         <tr>
-          <th>Crop</th>
-          <th>Description</th>
-          <th>Soil</th>
+          <th>{{ tr("Crop") }}</th>
+          <th>{{ tr("Description") }}</th>
+          <th>{{ tr("Soil") }}</th>
           <th>pH</th>
-          <th>Rainfall</th>
-          <th>Temperature</th>
+          <th>{{ tr("Rainfall") }}</th>
+          <th>{{ tr("Temperature") }}</th>
         </tr>
       </thead>
       <tbody>

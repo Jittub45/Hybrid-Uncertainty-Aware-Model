@@ -1,26 +1,32 @@
 {% extends "base.html" %}
 
-{% block title %}Verify OTP | {{ app_name }}{% endblock %}
+{% block title %}{{ tr("Verify OTP") }} | {{ app_name }}{% endblock %}
 
 {% block content %}
 <section class="shell section-gap auth-wrap">
   <article class="panel-card auth-card reveal is-visible">
-    <p class="kicker">One Time Password</p>
-    <h1>Verify OTP</h1>
-    <p class="tiny">We sent a 6-digit OTP to <strong>{{ email }}</strong>.</p>
+    <p class="kicker">{{ tr("One Time Password") }}</p>
+    <h1>{{ tr("Verify OTP") }}</h1>
+    <p class="tiny">{{ tr("We sent a 6-digit OTP to") }} <strong>{{ email }}</strong>.</p>
+
+    {% if dev_otp_code %}
+    <div class="flash-msg info">
+      {{ tr("Development OTP") }}: <strong>{{ dev_otp_code }}</strong>
+    </div>
+    {% endif %}
 
     <form method="post" class="auth-form" autocomplete="off">
-      <label>OTP code
-        <input type="text" name="otp" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="123456" required />
+      <label>{{ tr("OTP code") }}
+        <input type="text" name="otp" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="{{ tr('123456') }}" required />
       </label>
-      <button type="submit" class="btn btn-primary">Verify & Continue</button>
+      <button type="submit" class="btn btn-primary">{{ tr("Verify & Continue") }}</button>
     </form>
 
     <form method="post" action="{{ url_for('resend_otp') }}" class="resend-form">
-      <button type="submit" class="btn btn-ghost">Resend OTP</button>
+      <button type="submit" class="btn btn-ghost">{{ tr("Resend OTP") }}</button>
     </form>
 
-    <p class="auth-alt">Wrong email? <a href="{{ url_for('login') }}">Back to login</a></p>
+    <p class="auth-alt">{{ tr("Wrong email?") }} <a href="{{ url_for('login') }}">{{ tr("Back to login") }}</a></p>
   </article>
 </section>
 {% endblock %}
