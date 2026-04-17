@@ -29,7 +29,6 @@
         <a href="{{ url_for('schemes_page') }}" class="{% if request.path == '/schemes' %}active{% endif %}">{{ tr("Schemes") }}</a>
         <a href="{{ url_for('insights_page') }}" class="{% if request.path == '/insights' %}active{% endif %}">{{ tr("Model Insights") }}</a>
         <a href="{{ url_for('about_page') }}" class="{% if request.path == '/about' %}active{% endif %}">{{ tr("About") }}</a>
-        <label class="lang-wrap" for="langSelect">{{ tr("Language") }}</label>
         <select id="langSelect" class="lang-select" aria-label="{{ tr('Select language') }}">
           {% for code, label in supported_languages.items() %}
           <option value="{{ code }}" {% if code == current_lang %}selected{% endif %}>{{ label }}</option>
