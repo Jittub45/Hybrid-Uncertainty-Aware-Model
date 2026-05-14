@@ -23,7 +23,10 @@ from flask import redirect, url_for, flash, session
 from flask_login import LoginManager, UserMixin, current_user, login_required, login_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    load_dotenv = None
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, log_loss, top_k_accuracy_score
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -40,7 +43,8 @@ TMPL_DIR   = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates
 DATA_PATH  = os.path.join(BASE_DIR, "data", "Crop_recommendation.csv")
 SCHEMES_DATA_PATH = os.path.join(BASE_DIR, "data", "agriculture_schemes_multilingual.json")
 
-load_dotenv(os.path.join(BASE_DIR, ".env"))
+if load_dotenv is not None:
+    load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 app = Flask(__name__, template_folder=TMPL_DIR)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-change-me")
