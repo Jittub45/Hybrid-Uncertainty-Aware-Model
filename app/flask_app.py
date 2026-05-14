@@ -61,7 +61,7 @@ if "postgresql" in (os.environ.get("DATABASE_URL") or ""):
     engine_options = {
         "connect_args": {
             "sslmode": "require",
-            "timeout": 10,
+            "connect_timeout": 10,
         }
     }
 
