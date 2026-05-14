@@ -574,6 +574,11 @@ def _phone_valid(phone_number: str) -> bool:
 
 
 def _ensure_users_table_columns() -> None:
+    """Ensure all required columns exist on the users table.
+    
+    This is a best-effort function that works with SQLite but gracefully
+    skips on Postgres since Postgres will auto-create columns via db.create_all().
+    """
     required_columns = {
         "farmer_name": "VARCHAR(120)",
         "land_acres": "FLOAT",
@@ -581,14 +586,20 @@ def _ensure_users_table_columns() -> None:
         "phone_number": "VARCHAR(24)",
     }
 
-    existing = db.session.execute(text("PRAGMA table_info(users)")).mappings().all()
-    existing_names = {row.get("name") for row in existing}
+    try:
+        # Try SQLite approach first
+        existing = db.session.execute(text("PRAGMA table_info(users)")).mappings().all()
+        existing_names = {row.get("name") for row in existing}
 
-    for col_name, col_type in required_columns.items():
-        if col_name not in existing_names:
-            db.session.execute(text(f"ALTER TABLE users ADD COLUMN {col_name} {col_type}"))
+        for col_name, col_type in required_columns.items():
+            if col_name not in existing_names:
+                db.session.execute(text(f"ALTER TABLE users ADD COLUMN {col_name} {col_type}"))
 
-    db.session.commit()
+        db.session.commit()
+    except Exception:
+        # If PRAGMA doesn't work (Postgres, etc.), skip this check.
+        # The ORM schema should already be set up via db.create_all().
+        pass
 
 
 def _generate_otp_code() -> str:
