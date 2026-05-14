@@ -115,23 +115,27 @@ def _generate_with_gemini(prompt: str) -> str:
 
     if not api_key:
         raise RuntimeError(
-            "Gemini API key is missing. Set GEMINI_API_KEY in your .env file."
+            "Gemini API key not configured. Please contact the administrator to set GEMINI_API_KEY environment variable."
         )
 
-    genai = _load_gemini_client(api_key)
-    model = genai.GenerativeModel(model_name=model_name)
-    response = model.generate_content(
-        prompt,
-        generation_config={
-            "temperature": 0.2,
-            "max_output_tokens": 350,
-        },
-    )
+    try:
+        genai = _load_gemini_client(api_key)
+        model = genai.GenerativeModel(model_name=model_name)
+        response = model.generate_content(
+            prompt,
+            generation_config={
+                "temperature": 0.2,
+                "max_output_tokens": 350,
+            },
+        )
 
-    text = (getattr(response, "text", "") or "").strip()
-    if not text:
-        raise RuntimeError("Gemini returned an empty response.")
-    return text
+        text = (getattr(response, "text", "") or "").strip()
+        if not text:
+            raise RuntimeError("Gemini returned an empty response.")
+        return text
+    except Exception as e:
+        # Graceful fallback
+        raise RuntimeError(f"AI service temporarily unavailable: {str(e)[:100]}")
 
 
 def generate_chatbot_reply(message: str, crop_info: Dict[str, Dict[str, str]], crop_library: Dict[str, Dict[str, str]], lang: str = "en") -> Dict[str, Any]:
