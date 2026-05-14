@@ -9,6 +9,8 @@ wheels/
 # Virtual environments
 .venv/
 venv/
+env/
+ENV/
 
 # Jupyter
 .ipynb_checkpoints/
@@ -21,9 +23,27 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
 
 # Local secrets and runtime data
 .env
+.env.local
+.env.*.local
 app/auth.db
+*.db
+secrets.json
+
+# Credentials and keys (NEVER commit these)
+*_key
+*_secret
+*credentials*
+*token*
+.aws/
+.ssh/
+
+# Render deployment
+render.yaml (do NOT add real secrets here - use Render dashboard)
 
 # NOTE: models/*.pkl are intentionally tracked — required for Render deployment
+# NOTE: .env.example should be committed (template without secrets)
