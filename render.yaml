@@ -24,10 +24,6 @@ services:
         sync: false
       - key: SMTP_FROM
         sync: false
-      - key: GEMINI_API_KEY
-        sync: false
-      - key: GEMINI_MODEL
-        value: gemini-1.5-flash
     plan: free
 
 databases:
