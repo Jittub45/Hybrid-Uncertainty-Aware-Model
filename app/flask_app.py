@@ -55,7 +55,17 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-db = SQLAlchemy(app)
+# Add SSL options for Postgres connections (required by Render)
+engine_options = {}
+if "postgresql" in (os.environ.get("DATABASE_URL") or ""):
+    engine_options = {
+        "connect_args": {
+            "sslmode": "require",
+            "timeout": 10,
+        }
+    }
+
+db = SQLAlchemy(app, engine_options=engine_options)
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
 login_manager.login_message = "Please log in to continue."
